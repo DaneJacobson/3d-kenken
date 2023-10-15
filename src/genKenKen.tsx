@@ -146,7 +146,7 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
         return { operation, result };
     }
     
-
+    // Generate the KenKen puzzle
     for (let x = 0; x < n; x++) {
         for (let y = 0; y < n; y++) {
             for (let z = 0; z < n; z++) {
@@ -184,14 +184,27 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
     return cages;
 }
 
-function generate3DKenKen(n: number): { cube: LatinCube, cages: Cage[] } | null {
+function generateCellToCageMap(cages: Cage[]): Map<string, number> {
+    const cellToCageMap = new Map<string, number>();
+
+    cages.forEach((cage, cageIndex) => {
+        cage.cells.forEach(cell => {
+            cellToCageMap.set(cell.toString(), cageIndex);
+        });
+    });
+
+    return cellToCageMap;
+}
+
+function generate3DKenKen(n: number): { cube: LatinCube, cages: Cage[], cellToCageMap: Map<string, number> } | null {
     const cube = generateLatinCube(n);
     if (!cube) {
         return null;
     }
 
     const cages = generateCagesForCube(cube);
-    return { cube, cages };
+    const cellToCageMap = generateCellToCageMap(cages)
+    return { cube, cages, cellToCageMap };
 }
 
 export default generate3DKenKen;
