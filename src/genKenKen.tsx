@@ -1,12 +1,7 @@
-type LatinCube = number[][][];
+import { LatinCube, Color, Cage } from './types.tsx';
 
-type Cage = { 
-    cells: [number, number, number][], 
-    operation: string, 
-    result: number 
-};
 
-function generateLatinCube(n: number): LatinCube | null {
+function generateLatinCube(n: number): LatinCube {
     let cube: LatinCube = Array.from(
         { length: n }, 
         () => Array.from({ length: n }, () => Array(n).fill(0))
@@ -57,10 +52,7 @@ function generateLatinCube(n: number): LatinCube | null {
         return false;
     }
 
-    if (!solve()) {
-        return null;
-    }
-
+    solve();
     return cube;
 }
 
@@ -68,6 +60,7 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
     const cages: Cage[] = [];
     const n = cube.length;
     const used: boolean[][][] = Array.from({ length: n }, () => Array.from({ length: n }, () => Array(n).fill(false)));
+    const colors: Color[] = ['salmon', 'yellow', 'lightgreen', 'lightblue', 'whitesmoke'];
 
     function getAdjacentCells(x: number, y: number, z: number): [number, number, number][] {
         const directions = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]];
@@ -146,7 +139,7 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
         return { operation, result };
     }
     
-
+    // Generate the KenKen puzzle
     for (let x = 0; x < n; x++) {
         for (let y = 0; y < n; y++) {
             for (let z = 0; z < n; z++) {
@@ -174,8 +167,12 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
                         used[cell[0]][cell[1]][cell[2]] = true;
                     }
 
+                    // Find and set the operation and result
                     const { operation, result } = determineOperation(values);
-                    cages.push({ cells: cageCells, operation, result });
+                    // Determine the color of the cage
+                    const color: Color = colors[cages.length % colors.length];
+                    // Add to the cages list.
+                    cages.push({ cells: cageCells, operation, result, color });
                 }
             }
         }
@@ -184,14 +181,29 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
     return cages;
 }
 
-function generate3DKenKen(n: number): { cube: LatinCube, cages: Cage[] } | null {
-    const cube = generateLatinCube(n);
-    if (!cube) {
-        return null;
-    }
+function generateCellToCageMap(cages: Cage[]): Map<string, number> {
+    const cellToCageMap = new Map<string, number>();
 
+    cages.forEach((cage, cageIndex) => {
+        cage.cells.forEach(cell => {
+            cellToCageMap.set(cell.toString(), cageIndex);
+        });
+    });
+
+    return cellToCageMap;
+}
+
+function generate3DKenKen(
+    n: number
+): { 
+    cube: LatinCube, 
+    cages: Cage[], 
+    cellToCageMap: Map<string, number> 
+} {
+    const cube = generateLatinCube(n);
     const cages = generateCagesForCube(cube);
-    return { cube, cages };
+    const cellToCageMap = generateCellToCageMap(cages);
+    return { cube, cages, cellToCageMap };
 }
 
 export default generate3DKenKen;
