@@ -1,34 +1,55 @@
 import { Canvas, useThree } from '@react-three/fiber';
 import * as React from 'react';
 import { OrbitControls } from '@react-three/drei';
+import { CanvasTexture, Sprite, SpriteMaterial } from 'three';
 
 import generate3DKenKen from './genKenKen.tsx';
+import { BoxProps, N } from './types.tsx'
 
 
-const N: number = 4;
+function createTextTexture(number: number) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;  // you can adjust for resolution
+  canvas.height = 128; // you can adjust for resolution
+  const context = canvas.getContext('2d')!;
 
-type BoxProps = {
-  position: [number, number, number];
+  // Draw the background (optional)
+  context.fillStyle = 'rgba(255, 255, 255, 0)';  // transparent
+  context.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Draw the number
+  context.font = '64px Arial';
+  context.textAlign = 'center';
+  context.textBaseline = 'middle';
+  context.fillStyle = 'black';
+  context.fillText(number.toString(), canvas.width / 2, canvas.height / 2);
+
+  return new CanvasTexture(canvas);
 }
 
-function Box({ position }: BoxProps) {
-  const boxColor = 0x808080; // Gray
+function Box({ position, number, color }: BoxProps) {
+  const textTexture = createTextTexture(number);
+  const spriteMaterial = new SpriteMaterial({ map: textTexture });
+  const sprite = new Sprite(spriteMaterial);
+  sprite.scale.set(0.45, 0.45, 1); // Adjust as needed to fit the box
 
   return (
     <group position={position}>
       <mesh>
-        <boxGeometry args={[0.5, 0.5, 0.5]} /> {/* Half in size */}
-        <meshStandardMaterial color={boxColor} transparent opacity={0.3} /> {/* Gray color */}
+        <boxGeometry args={[0.5, 0.5, 0.5]} />
+        <meshStandardMaterial color={color} transparent={true} opacity={0.7} />
       </mesh>
       <lineSegments>
         <edgesGeometry attach="geometry">
-          <boxGeometry args={[0.5, 0.5, 0.5]} /> {/* Half in size for the edges as well */}
+          <boxGeometry args={[0.5, 0.5, 0.5]} />
         </edgesGeometry>
-        <lineBasicMaterial color={boxColor} />
+        <lineBasicMaterial color={color} />
       </lineSegments>
+      <primitive object={sprite} /> {/* This is the sprite containing the number */}
     </group>
   );
 }
+
 
 function OrbitGroup({ children }: { children: React.ReactNode }) {
   const { camera, gl } = useThree();
@@ -58,8 +79,8 @@ function App() {
               y * offset - (N - 1) * (offset / 2),
               z * offset - (N - 1) * (offset / 2),
             ]}
-            // number
-            // color
+            number={puzzle.cube[x][y][z]}
+            color={puzzle.cages[puzzle.cellToCageMap.get([x, y, z].join(','))!].color}
           />
         );
       }
@@ -68,8 +89,9 @@ function App() {
 
   return (
     <Canvas>
-      <ambientLight intensity={0.1} />
-      <directionalLight color="red" position={[0, 0, 5]} />
+      <ambientLight intensity={0.7} />
+      <directionalLight color="white" position={[0, 0, 5]} />
+      <pointLight position={[0, 0, 0]} intensity={2.0} />
       <OrbitGroup>
         {cubes}
       </OrbitGroup>

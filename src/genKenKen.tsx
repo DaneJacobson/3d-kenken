@@ -1,12 +1,7 @@
-type LatinCube = number[][][];
+import { LatinCube, Color, Cage } from './types.tsx';
 
-type Cage = { 
-    cells: [number, number, number][], 
-    operation: string, 
-    result: number 
-};
 
-function generateLatinCube(n: number): LatinCube | null {
+function generateLatinCube(n: number): LatinCube {
     let cube: LatinCube = Array.from(
         { length: n }, 
         () => Array.from({ length: n }, () => Array(n).fill(0))
@@ -57,10 +52,7 @@ function generateLatinCube(n: number): LatinCube | null {
         return false;
     }
 
-    if (!solve()) {
-        return null;
-    }
-
+    solve();
     return cube;
 }
 
@@ -68,6 +60,7 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
     const cages: Cage[] = [];
     const n = cube.length;
     const used: boolean[][][] = Array.from({ length: n }, () => Array.from({ length: n }, () => Array(n).fill(false)));
+    const colors: Color[] = ['salmon', 'yellow', 'lightgreen', 'lightblue', 'whitesmoke'];
 
     function getAdjacentCells(x: number, y: number, z: number): [number, number, number][] {
         const directions = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]];
@@ -174,8 +167,12 @@ function generateCagesForCube(cube: LatinCube): Cage[] {
                         used[cell[0]][cell[1]][cell[2]] = true;
                     }
 
+                    // Find and set the operation and result
                     const { operation, result } = determineOperation(values);
-                    cages.push({ cells: cageCells, operation, result });
+                    // Determine the color of the cage
+                    const color: Color = colors[cages.length % colors.length];
+                    // Add to the cages list.
+                    cages.push({ cells: cageCells, operation, result, color });
                 }
             }
         }
@@ -196,14 +193,16 @@ function generateCellToCageMap(cages: Cage[]): Map<string, number> {
     return cellToCageMap;
 }
 
-function generate3DKenKen(n: number): { cube: LatinCube, cages: Cage[], cellToCageMap: Map<string, number> } | null {
+function generate3DKenKen(
+    n: number
+): { 
+    cube: LatinCube, 
+    cages: Cage[], 
+    cellToCageMap: Map<string, number> 
+} {
     const cube = generateLatinCube(n);
-    if (!cube) {
-        return null;
-    }
-
     const cages = generateCagesForCube(cube);
-    const cellToCageMap = generateCellToCageMap(cages)
+    const cellToCageMap = generateCellToCageMap(cages);
     return { cube, cages, cellToCageMap };
 }
 
