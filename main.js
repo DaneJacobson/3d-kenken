@@ -1,14 +1,20 @@
 import * as THREE from 'three';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
+import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
+import { Line2 } from 'three/addons/lines/Line2.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
+function p(s) {
+    console.log(s);
+}
 
 class Puzzle {
     constructor(n, cubeInfo, cageInfo, scene, camera, renderer) {
         const self = this;
         self._n = n; // cubic dimensions
-        self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeReference': cube reference}
+        self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference}
         self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number}}
         self._scene = scene;
 
@@ -23,66 +29,96 @@ class Puzzle {
                 for (let j = 0; j < self._n; j++) {
                     for (let k = 0; k < self._n; k++) {
                         // Create the cube with text at the right location
-                        const cube = self.createCube(
+                        const cubeGroup = self.createCube(
                             i - spacing, 
                             j - spacing, 
                             k - spacing, 
-                            self._cubeInfo[[i, j, k].join("-")].value,
+                            // self._cubeInfo[[i, j, k].join("-")].value,
+                            [i, j, k].join("-")
                         );
 
                         // Track a reference to the cube
-                        self._cubeInfo[[i, j, k].join("-")].cubeReference = cube;
+                        self._cubeInfo[[i, j, k].join("-")].cubeGroupReference = cubeGroup;
                     }
                 }
             }
+
+            // Add controls
+            self._currentPointer = "0-2-2";
+            fakePuzzle.setPointer(self._currentPointer)
+
         });
     }
 
     // Function to create a cube
     createCube(x, y, z, value) {
         const self = this;
+        const cubeGroup = new THREE.Group();
 
         // Create and render the cube
         const cubeGeometry = new THREE.BoxGeometry();
         const cubeMaterial = new THREE.MeshBasicMaterial({
-            color: 0x00ff00,
+            color: 0xd3d3d3,
             transparent: true,
             opacity: 0.5
         });
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+        cube.name = "cube";
         cube.position.set(x, y, z);
-        self._scene.add(cube);
+        cubeGroup.add(cube);
 
         // Create and render the edges of the cube
         const edgesGeometry = new THREE.EdgesGeometry(cubeGeometry);
-        const edgesMaterial = new THREE.LineBasicMaterial({color:0x000000});
-        const line = new THREE.LineSegments(edgesGeometry, edgesMaterial);
-        line.position.set(x, y, z);
-        self._scene.add(line);
+        const lineSegmentsGeometry = new LineSegmentsGeometry();
+        lineSegmentsGeometry.setPositions(edgesGeometry.attributes.position.array);
+        const lineMaterial = new LineMaterial({
+            color: 0x000000,
+            linewidth: 1,
+            resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
+        })
+        const edges = new Line2(lineSegmentsGeometry, lineMaterial);
+        edges.name = "edges";
+        edges.position.set(x, y, z);
+        cubeGroup.add(edges);
 
         // Create and render the text of the cube
         const textGeometry = new TextGeometry(value.toString(), {
             font: self._font,
-            size: 0.5,
+            size: 0.3,
             height: 0.1
         });
         textGeometry.center();
         const textMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
         const text = new THREE.Mesh(textGeometry, textMaterial);
+        text.name = "text";
         text.position.set(x, y, z);
-        self._scene.add(text);
+        cubeGroup.add(text);
 
-        return cube;
+        // Add the entire cubeGroup at once
+        self._scene.add(cubeGroup);
+
+        return cubeGroup;
+    }
+
+    // Set the pointer to the target cube.
+    setPointer(target) {
+        const self = this;
+
+        // Change the linewidths
+        self._cubeInfo[self._currentPointer].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 1;
+        self._cubeInfo[target].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 5;
+
+        // Set pointer
+        self._currentPointer = target;
     }
 }
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-const renderer = new THREE.WebGLRenderer();
+const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0xffffff, 1);
 document.body.appendChild(renderer.domElement);
-
 camera.position.z = 5;
 
 
@@ -90,33 +126,33 @@ camera.position.z = 5;
 const fakePuzzle = new Puzzle(
     3,
     {
-        '0-0-0': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeReference': null},
-        '0-0-1': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeReference': null},
-        '0-0-2': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeReference': null},
-        '0-1-0': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeReference': null},
-        '0-1-1': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeReference': null},
-        '0-1-2': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeReference': null},
-        '0-2-0': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeReference': null},
-        '0-2-1': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeReference': null},
-        '0-2-2': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeReference': null},
-        '1-0-0': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeReference': null},
-        '1-0-1': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeReference': null},
-        '1-0-2': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeReference': null},
-        '1-1-0': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeReference': null},
-        '1-1-1': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeReference': null},
-        '1-1-2': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeReference': null},
-        '1-2-0': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeReference': null},
-        '1-2-1': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeReference': null},
-        '1-2-2': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeReference': null},
-        '2-0-0': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeReference': null},
-        '2-0-1': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeReference': null},
-        '2-0-2': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeReference': null},
-        '2-1-0': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeReference': null},
-        '2-1-1': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeReference': null},
-        '2-1-2': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeReference': null},
-        '2-2-0': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeReference': null},
-        '2-2-1': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeReference': null},
-        '2-2-2': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeReference': null}
+        '0-0-0': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-0-1': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-0-2': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-1-0': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-1-1': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-1-2': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-2-0': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
+        '0-2-1': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
+        '0-2-2': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
+        '1-0-0': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-0-1': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-0-2': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-1-0': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-1-1': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-1-2': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-2-0': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
+        '1-2-1': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
+        '1-2-2': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
+        '2-0-0': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-0-1': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-0-2': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-1-0': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-1-1': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-1-2': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-2-0': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null},
+        '2-2-1': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null},
+        '2-2-2': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null}
     }, 
     {
         '1': {'operator': '+', 'result': '3'},
@@ -134,11 +170,56 @@ const fakePuzzle = new Puzzle(
     renderer
 );
 
+
+// Keyboard controls
+window.addEventListener("keydown", function(event) {
+    const key = event.key;
+
+    // Extract the current coordinates from the currentPointer
+    let [x, y, z] = fakePuzzle._currentPointer.split("-").map(Number);
+
+    // Define the maximum boundary based on the puzzle size
+    const max = fakePuzzle._n - 1;
+
+    // Process the direction inputs
+    switch (key) {
+        case "ArrowUp":
+            if (event.shiftKey) {
+                if (z > 0) z--;
+            } else {
+                if (y < max) y++;
+            }
+            break;
+        case "ArrowDown":
+            if (event.shiftKey) {
+                if (z < max) z++;
+            } else {
+                if (y > 0) y--;
+            }
+            break;
+        case "ArrowLeft":
+            if (x > 0) x--;
+            break;
+        case "ArrowRight":
+            if (x < max) x++;
+            break;
+    }
+
+    // Update the current pointer
+    const newPointer = `${x}-${y}-${z}`;
+    if (newPointer !== fakePuzzle._currentPointer) {
+        fakePuzzle.setPointer(newPointer);
+    }
+});
+
+const axesHelper = new THREE.AxesHelper( 5 );
+scene.add( axesHelper );
+
 // Function to animate the scene.
 function animate() {
     requestAnimationFrame(animate);
-    scene.rotation.x += 0.01;
-    scene.rotation.y += 0.01;
+    scene.rotation.x = 0.5;
+    scene.rotation.y = 0.5;
     renderer.render(scene, camera);
 }
 
@@ -151,5 +232,5 @@ if (WebGL.isWebGLAvailable()) {
 }
 
 // setTimeout(() => {
-//     fakePuzzle.cubeInfo["0-0-0"].cubeReference.material.color.set(0xff0000);
+//     fakePuzzle.setPointer("0-0-0");
 // }, 5000);

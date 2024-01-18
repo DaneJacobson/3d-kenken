@@ -2,8 +2,6 @@
 
 TODO:
 - build the puzzle
-    - need transparency so I can see the numbers
-    - add number text
     - add controls
         - highlight box with black outline at (0,0,0) (starting point)
         - navigate each cube with controls (up down left right and then shift for y axis)
