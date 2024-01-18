@@ -1,7 +1,0 @@
-#canvas-container {
-  display: flex;
-  justify-content: center; /* centers children horizontally */
-  align-items: center;     /* centers children vertically */
-  width: 100vw;
-  height: 100vh;
-}
