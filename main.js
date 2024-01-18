@@ -1,31 +1,47 @@
 import * as THREE from 'three';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
 
 class Puzzle {
     constructor(n, cubeInfo, cageInfo, scene, camera, renderer) {
-        this.n = n; // cubic dimensions
-        this.cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeReference': cube reference}
-        this.cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number}}
-        this.scene = scene;
+        const self = this;
+        self._n = n; // cubic dimensions
+        self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeReference': cube reference}
+        self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number}}
+        self._scene = scene;
 
-        // Render the puzzle
-        const spacing = (this.n - 1) / 2;
-        for (let i = 0; i < this.n; i++) {
-            for (let j = 0; j < this.n; j++) {
-                for (let k = 0; k < this.n; k++) {
-                    // Create the cube at the right location
-                    const cube = this.createCube(i - spacing, j - spacing, k - spacing);
+        // Loading in a font for the cube value text
+        const loader = new FontLoader();
+        loader.load('public/fonts/helvetiker_regular.typeface.json', function (font) {
+            self._font = font;
 
-                    // Track a reference to the cube
-                    this.cubeInfo[[i, j, k].join("-")].cubeReference = cube;
+            // Render the puzzle
+            const spacing = (self._n - 1) / 2;
+            for (let i = 0; i < self._n; i++) {
+                for (let j = 0; j < self._n; j++) {
+                    for (let k = 0; k < self._n; k++) {
+                        // Create the cube with text at the right location
+                        const cube = self.createCube(
+                            i - spacing, 
+                            j - spacing, 
+                            k - spacing, 
+                            self._cubeInfo[[i, j, k].join("-")].value,
+                        );
+
+                        // Track a reference to the cube
+                        self._cubeInfo[[i, j, k].join("-")].cubeReference = cube;
+                    }
                 }
             }
-        }
+        });
     }
 
     // Function to create a cube
-    createCube(x, y, z) {
+    createCube(x, y, z, value) {
+        const self = this;
+
         // Create and render the cube
         const cubeGeometry = new THREE.BoxGeometry();
         const cubeMaterial = new THREE.MeshBasicMaterial({
@@ -35,14 +51,26 @@ class Puzzle {
         });
         const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
         cube.position.set(x, y, z);
-        scene.add(cube);
+        self._scene.add(cube);
 
         // Create and render the edges of the cube
         const edgesGeometry = new THREE.EdgesGeometry(cubeGeometry);
         const edgesMaterial = new THREE.LineBasicMaterial({color:0x000000});
         const line = new THREE.LineSegments(edgesGeometry, edgesMaterial);
         line.position.set(x, y, z);
-        scene.add(line);
+        self._scene.add(line);
+
+        // Create and render the text of the cube
+        const textGeometry = new TextGeometry(value.toString(), {
+            font: self._font,
+            size: 0.5,
+            height: 0.1
+        });
+        textGeometry.center();
+        const textMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
+        const text = new THREE.Mesh(textGeometry, textMaterial);
+        text.position.set(x, y, z);
+        self._scene.add(text);
 
         return cube;
     }
