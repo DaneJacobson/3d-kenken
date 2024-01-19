@@ -7,6 +7,11 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
+
+const TEXT_SIZE = 0.5;
+const TEXT_HEIGHT = 0.1;
+
+
 // for debugging
 function p(s) {
     console.log(s);
@@ -101,8 +106,8 @@ class Puzzle {
         // Create and render the text of the cube
         const textGeometry = new TextGeometry(value.toString(), {
             font: self._font,
-            size: 0.3,
-            height: 0.1
+            size: TEXT_SIZE,
+            height: TEXT_HEIGHT
         });
         textGeometry.center();
         const textMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
@@ -128,8 +133,8 @@ class Puzzle {
         // Create a new textGeometry
         const newTextGeometry = new TextGeometry(input.toString(), {
             font: self._font,
-            size: 0.3,
-            height: 0.1
+            size: TEXT_SIZE,
+            height: TEXT_HEIGHT
         });
         newTextGeometry.center();
 
