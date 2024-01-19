@@ -12,9 +12,9 @@ function p(s) {
     console.log(s);
 }
 
-// Returns random rainbow Color for cage Coloring
+// Returns random rainbow color for cage coloring
 function getRandomRainbowColor() {
-    // Array of hex codes representing rainbow Colors
+    // Array of hex codes representing rainbow colors
     const rainbowColors = [
         '#ff0000', // Red
         '#ff7f00', // Orange
@@ -25,7 +25,7 @@ function getRandomRainbowColor() {
         '#9400d3'  // Violet
     ];
 
-    // Randomly select a Color from the array
+    // Randomly select a color from the array
     const randomIndex = Math.floor(Math.random() * rainbowColors.length);
     return rainbowColors[randomIndex];
 }
@@ -33,14 +33,14 @@ function getRandomRainbowColor() {
 class Puzzle {
     constructor(n, cubeInfo, cageInfo, scene, camera, renderer) {
         const self = this;
-        self._n = n; // cubic dimensions
-        self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference}
-        self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
-        self._scene = scene;
 
         // Loading in a font for the cube value text
         const loader = new FontLoader();
         loader.load('public/fonts/helvetiker_regular.typeface.json', function (font) {
+            self._n = n; // cubic dimensions
+            self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference}
+            self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
+            self._scene = scene;
             self._font = font;
 
             // Render the puzzle
@@ -52,8 +52,7 @@ class Puzzle {
                         const cubeGroup = self.createCube(
                             i - spacing, 
                             j - spacing, 
-                            k - spacing, 
-                            // self._cubeInfo[[i, j, k].join("-")].value,
+                            k - spacing,
                             self._cubeInfo[`${i}-${j}-${k}`].value,
                             self._cageInfo[self._cubeInfo[`${i}-${j}-${k}`].cageNumber].color
                         );
@@ -66,7 +65,7 @@ class Puzzle {
 
             // Add controls
             self._currentPointer = "0-2-2";
-            fakePuzzle.setPointer(self._currentPointer)
+            self.setCurrentPointer(self._currentPointer);
         });
     }
 
@@ -120,8 +119,29 @@ class Puzzle {
         return cubeGroup;
     }
 
+    // Set the value of the current cube to the provided input.
+    setCurrentPointerValue(input) {
+        const self = this;
+
+        // Retrieve the textMesh from the puzzle information
+        const cubeGroupReference = self._cubeInfo[self._currentPointer].cubeGroupReference;
+        const textMesh = cubeGroupReference.children.find(c => c.name === "text");
+
+        // Create a new textGeometry
+        const newTextGeometry = new TextGeometry(input.toString(), {
+            font: self._font,
+            size: 0.3,
+            height: 0.1
+        });
+        newTextGeometry.center();
+
+        // Send old textGeometry to the GC and set new textGeometry
+        textMesh.geometry.dispose();
+        textMesh.geometry = newTextGeometry;
+    }
+
     // Set the pointer to the target cube.
-    setPointer(target) {
+    setCurrentPointer(target) {
         const self = this;
 
         // Change the linewidths
@@ -145,33 +165,33 @@ camera.position.z = 5;
 const fakePuzzle = new Puzzle(
     3,
     {
-        '0-0-0': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-0-1': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-0-2': {'value': '1', 'solution': '1', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-1-0': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-1-1': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-1-2': {'value': '1', 'solution': '1', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-2-0': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
-        '0-2-1': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
-        '0-2-2': {'value': '1', 'solution': '1', 'cageNumber': '3', 'cubeGroupReference': null},
-        '1-0-0': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-0-1': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-0-2': {'value': '1', 'solution': '1', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-1-0': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-1-1': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-1-2': {'value': '1', 'solution': '1', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-2-0': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
-        '1-2-1': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
-        '1-2-2': {'value': '1', 'solution': '1', 'cageNumber': '6', 'cubeGroupReference': null},
-        '2-0-0': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-0-1': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-0-2': {'value': '1', 'solution': '1', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-1-0': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-1-1': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-1-2': {'value': '1', 'solution': '1', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-2-0': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null},
-        '2-2-1': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null},
-        '2-2-2': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null}
+        '0-0-0': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-0-1': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-0-2': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
+        '0-1-0': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-1-1': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-1-2': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
+        '0-2-0': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
+        '0-2-1': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
+        '0-2-2': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
+        '1-0-0': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-0-1': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-0-2': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
+        '1-1-0': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-1-1': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-1-2': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
+        '1-2-0': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
+        '1-2-1': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
+        '1-2-2': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
+        '2-0-0': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-0-1': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-0-2': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
+        '2-1-0': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-1-1': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-1-2': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
+        '2-2-0': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null},
+        '2-2-1': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null},
+        '2-2-2': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null}
     }, 
     {
         '1': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
@@ -194,6 +214,12 @@ const fakePuzzle = new Puzzle(
 window.addEventListener("keydown", function(event) {
     // Get the keyboard input
     const key = event.key;
+
+    // Check if the key is an integer
+    if (!isNaN(parseInt(key, 10)) && key > 0 && key <= 9) {
+        fakePuzzle.setCurrentPointerValue(key);
+        return;
+    }
 
     // Extract the current coordinates from the currentPointer
     let [x, y, z] = fakePuzzle._currentPointer.split("-").map(Number);
@@ -228,7 +254,7 @@ window.addEventListener("keydown", function(event) {
     // Update the current pointer
     const newPointer = `${x}-${y}-${z}`;
     if (newPointer !== fakePuzzle._currentPointer) {
-        fakePuzzle.setPointer(newPointer);
+        fakePuzzle.setCurrentPointer(newPointer);
     }
 });
 
@@ -256,5 +282,5 @@ if (WebGL.isWebGLAvailable()) {
 }
 
 // setTimeout(() => {
-//     fakePuzzle.setPointer("0-0-0");
+//     fakePuzzle.setCurrentPointerValue("0-0-0");
 // }, 5000);
