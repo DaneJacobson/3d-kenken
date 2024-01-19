@@ -7,6 +7,8 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
+import { KenKen } from './KenKen.js';
+
 
 const TEXT_SIZE = 0.5;
 const TEXT_HEIGHT = 0.1;
@@ -45,6 +47,9 @@ class Puzzle {
             self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
             self._scene = scene;
             self._font = font;
+
+            // Assign colors
+            Object.entries(cageInfo).forEach(entry => entry[1].color = getRandomRainbowColor());
 
             // Render the puzzle
             const spacing = (self._n - 1) / 2;
@@ -164,53 +169,8 @@ renderer.setClearColor(0xffffff, 1);
 document.body.appendChild(renderer.domElement);
 camera.position.z = 5;
 
-// Dummy Puzzle
-const fakePuzzle = new Puzzle(
-    3,
-    {
-        '0-0-0': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-0-1': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-0-2': {'value': '', 'cageNumber': '1', 'cubeGroupReference': null},
-        '0-1-0': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-1-1': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-1-2': {'value': '', 'cageNumber': '2', 'cubeGroupReference': null},
-        '0-2-0': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
-        '0-2-1': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
-        '0-2-2': {'value': '', 'cageNumber': '3', 'cubeGroupReference': null},
-        '1-0-0': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-0-1': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-0-2': {'value': '', 'cageNumber': '4', 'cubeGroupReference': null},
-        '1-1-0': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-1-1': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-1-2': {'value': '', 'cageNumber': '5', 'cubeGroupReference': null},
-        '1-2-0': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
-        '1-2-1': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
-        '1-2-2': {'value': '', 'cageNumber': '6', 'cubeGroupReference': null},
-        '2-0-0': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-0-1': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-0-2': {'value': '', 'cageNumber': '7', 'cubeGroupReference': null},
-        '2-1-0': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-1-1': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-1-2': {'value': '', 'cageNumber': '8', 'cubeGroupReference': null},
-        '2-2-0': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null},
-        '2-2-1': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null},
-        '2-2-2': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null}
-    }, 
-    {
-        '1': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '2': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '3': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '4': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '5': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '6': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '7': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '8': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
-        '9': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()}
-    },
-    scene,
-    camera,
-    renderer
-);
+const kenken = new KenKen(3)
+const puzzle = new Puzzle(3, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
 
 
 // Keyboard controls
@@ -220,13 +180,13 @@ window.addEventListener("keydown", function(event) {
 
     // Check if the key is an integer
     if (!isNaN(parseInt(key, 10)) && key > 0 && key <= 9) {
-        fakePuzzle.setCurrentPointerValue(key);
+        puzzle.setCurrentPointerValue(key);
         return;
     }
 
     // Check if the key is Backspace or Delete
     if ((key === "Delete") || (key === "Backspace")) {
-        fakePuzzle.setCurrentPointerValue("");
+        puzzle.setCurrentPointerValue("");
         return;
     }
 
@@ -237,10 +197,10 @@ window.addEventListener("keydown", function(event) {
     }
 
     // Extract the current coordinates from the currentPointer
-    let [x, y, z] = fakePuzzle._currentPointer.split("-").map(Number);
+    let [x, y, z] = puzzle._currentPointer.split("-").map(Number);
 
     // Define the maximum boundary based on the puzzle size
-    const max = fakePuzzle._n - 1;
+    const max = puzzle._n - 1;
 
     // Process the direction inputs
     switch (key) {
@@ -268,8 +228,8 @@ window.addEventListener("keydown", function(event) {
 
     // Update the current pointer
     const newPointer = `${x}-${y}-${z}`;
-    if (newPointer !== fakePuzzle._currentPointer) {
-        fakePuzzle.setCurrentPointer(newPointer);
+    if (newPointer !== puzzle._currentPointer) {
+        puzzle.setCurrentPointer(newPointer);
     }
 });
 
