@@ -249,6 +249,12 @@ window.addEventListener("keydown", function(event) {
         case "ArrowRight":
             if (x < max) x++;
             break;
+        case "Backspace":
+            fakePuzzle.setCurrentPointerValue("");
+            break;
+        case "Delete":
+            fakePuzzle.setCurrentPointerValue("");
+            break;
     }
 
     // Update the current pointer
