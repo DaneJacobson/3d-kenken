@@ -3,11 +3,31 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { Line2 } from 'three/addons/lines/Line2.js';
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
+// for debugging
 function p(s) {
     console.log(s);
+}
+
+// Returns random rainbow Color for cage Coloring
+function getRandomRainbowColor() {
+    // Array of hex codes representing rainbow Colors
+    const rainbowColors = [
+        '#ff0000', // Red
+        '#ff7f00', // Orange
+        '#ffff00', // Yellow
+        '#00ff00', // Green
+        '#0000ff', // Blue
+        '#4b0082', // Indigo
+        '#9400d3'  // Violet
+    ];
+
+    // Randomly select a Color from the array
+    const randomIndex = Math.floor(Math.random() * rainbowColors.length);
+    return rainbowColors[randomIndex];
 }
 
 class Puzzle {
@@ -15,7 +35,7 @@ class Puzzle {
         const self = this;
         self._n = n; // cubic dimensions
         self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference}
-        self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number}}
+        self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
         self._scene = scene;
 
         // Loading in a font for the cube value text
@@ -34,7 +54,8 @@ class Puzzle {
                             j - spacing, 
                             k - spacing, 
                             // self._cubeInfo[[i, j, k].join("-")].value,
-                            [i, j, k].join("-")
+                            self._cubeInfo[`${i}-${j}-${k}`].value,
+                            self._cageInfo[self._cubeInfo[`${i}-${j}-${k}`].cageNumber].color
                         );
 
                         // Track a reference to the cube
@@ -46,19 +67,18 @@ class Puzzle {
             // Add controls
             self._currentPointer = "0-2-2";
             fakePuzzle.setPointer(self._currentPointer)
-
         });
     }
 
     // Function to create a cube
-    createCube(x, y, z, value) {
+    createCube(x, y, z, value, color) {
         const self = this;
         const cubeGroup = new THREE.Group();
 
         // Create and render the cube
         const cubeGeometry = new THREE.BoxGeometry();
         const cubeMaterial = new THREE.MeshBasicMaterial({
-            color: 0xd3d3d3,
+            color: color,
             transparent: true,
             opacity: 0.5
         });
@@ -121,7 +141,6 @@ renderer.setClearColor(0xffffff, 1);
 document.body.appendChild(renderer.domElement);
 camera.position.z = 5;
 
-
 // Dummy Puzzle
 const fakePuzzle = new Puzzle(
     3,
@@ -155,15 +174,15 @@ const fakePuzzle = new Puzzle(
         '2-2-2': {'value': '1', 'solution': '1', 'cageNumber': '9', 'cubeGroupReference': null}
     }, 
     {
-        '1': {'operator': '+', 'result': '3'},
-        '2': {'operator': '+', 'result': '3'},
-        '3': {'operator': '+', 'result': '3'},
-        '4': {'operator': '+', 'result': '3'},
-        '5': {'operator': '+', 'result': '3'},
-        '6': {'operator': '+', 'result': '3'},
-        '7': {'operator': '+', 'result': '3'},
-        '8': {'operator': '+', 'result': '3'},
-        '9': {'operator': '+', 'result': '3'}
+        '1': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '2': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '3': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '4': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '5': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '6': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '7': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '8': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
+        '9': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()}
     },
     scene,
     camera,
@@ -173,6 +192,7 @@ const fakePuzzle = new Puzzle(
 
 // Keyboard controls
 window.addEventListener("keydown", function(event) {
+    // Get the keyboard input
     const key = event.key;
 
     // Extract the current coordinates from the currentPointer
@@ -215,9 +235,13 @@ window.addEventListener("keydown", function(event) {
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
 
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+
 // Function to animate the scene.
 function animate() {
     requestAnimationFrame(animate);
+    controls.update();
     scene.rotation.x = 0.5;
     scene.rotation.y = 0.5;
     renderer.render(scene, camera);
