@@ -20,9 +20,7 @@ function getRandomRainbowColor() {
         '#ff7f00', // Orange
         '#ffff00', // Yellow
         '#00ff00', // Green
-        '#0000ff', // Blue
-        '#4b0082', // Indigo
-        '#9400d3'  // Violet
+        '#add8e6', // Blue
     ];
 
     // Randomly select a color from the array
@@ -194,15 +192,15 @@ const fakePuzzle = new Puzzle(
         '2-2-2': {'value': '', 'cageNumber': '9', 'cubeGroupReference': null}
     }, 
     {
-        '1': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '2': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '3': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '4': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '5': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '6': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '7': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '8': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()},
-        '9': {'operator': '+', 'result': '3', 'color': getRandomRainbowColor()}
+        '1': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '2': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '3': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '4': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '5': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '6': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '7': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '8': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()},
+        '9': {'operator': '+', 'result': '6', 'color': getRandomRainbowColor()}
     },
     scene,
     camera,
@@ -218,6 +216,18 @@ window.addEventListener("keydown", function(event) {
     // Check if the key is an integer
     if (!isNaN(parseInt(key, 10)) && key > 0 && key <= 9) {
         fakePuzzle.setCurrentPointerValue(key);
+        return;
+    }
+
+    // Check if the key is Backspace or Delete
+    if ((key === "Delete") || (key === "Backspace")) {
+        fakePuzzle.setCurrentPointerValue("");
+        return;
+    }
+
+    // Check if the key is a "reset camera" key
+    if (key === "r") {
+        camera.position.set(0, 0, 5);
         return;
     }
 
@@ -249,12 +259,6 @@ window.addEventListener("keydown", function(event) {
         case "ArrowRight":
             if (x < max) x++;
             break;
-        case "Backspace":
-            fakePuzzle.setCurrentPointerValue("");
-            break;
-        case "Delete":
-            fakePuzzle.setCurrentPointerValue("");
-            break;
     }
 
     // Update the current pointer
@@ -264,9 +268,11 @@ window.addEventListener("keydown", function(event) {
     }
 });
 
+// Add axes for debugging
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
 
+// Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
@@ -286,7 +292,3 @@ if (WebGL.isWebGLAvailable()) {
     const warning = WebGL.getWebGLErrorMessage();
     document.getElementById('container').appendChild(warning);
 }
-
-// setTimeout(() => {
-//     fakePuzzle.setCurrentPointerValue("0-0-0");
-// }, 5000);
