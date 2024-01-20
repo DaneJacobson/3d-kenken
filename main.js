@@ -43,7 +43,7 @@ class Puzzle {
         const loader = new FontLoader();
         loader.load('public/fonts/helvetiker_regular.typeface.json', function (font) {
             self._n = n; // cubic dimensions
-            self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference}
+            self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference, 'topCorner': true/false}
             self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
             self._scene = scene;
             self._font = font;
@@ -51,22 +51,11 @@ class Puzzle {
             // Assign colors
             Object.entries(cageInfo).forEach(entry => entry[1].color = getRandomRainbowColor());
 
-            // Render the puzzle
-            const spacing = (self._n - 1) / 2;
+            // Render the puzzle by create the cube with text at the right location
             for (let i = 0; i < self._n; i++) {
                 for (let j = 0; j < self._n; j++) {
                     for (let k = 0; k < self._n; k++) {
-                        // Create the cube with text at the right location
-                        const cubeGroup = self.createCube(
-                            i - spacing, 
-                            j - spacing, 
-                            k - spacing,
-                            self._cubeInfo[`${i}-${j}-${k}`].value,
-                            self._cageInfo[self._cubeInfo[`${i}-${j}-${k}`].cageNumber].color
-                        );
-
-                        // Track a reference to the cube
-                        self._cubeInfo[[i, j, k].join("-")].cubeGroupReference = cubeGroup;
+                        self.createCube(i, j, k);
                     }
                 }
             }
@@ -78,24 +67,32 @@ class Puzzle {
     }
 
     // Function to create a cube
-    createCube(x, y, z, value, color) {
+    createCube(i, j, k) {
         const self = this;
         const cubeGroup = new THREE.Group();
 
+        // Extract coordinate specific cube/cage information
+        const spacing = (self._n - 1) / 2;
+        const x = i - spacing;
+        const y = j - spacing;
+        const z = k - spacing;
+        const cube = self._cubeInfo[`${i}-${j}-${k}`];
+        const cage = self._cageInfo[cube.cageNumber];
+
         // Create and render the cube
-        const cubeGeometry = new THREE.BoxGeometry();
-        const cubeMaterial = new THREE.MeshBasicMaterial({
-            color: color,
+        const boxGeometry = new THREE.BoxGeometry();
+        const boxMaterial = new THREE.MeshBasicMaterial({
+            color: cage.color,
             transparent: true,
             opacity: 0.5
         });
-        const cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
-        cube.name = "cube";
-        cube.position.set(x, y, z);
-        cubeGroup.add(cube);
+        const box = new THREE.Mesh(boxGeometry, boxMaterial);
+        box.name = "box";
+        box.position.set(x, y, z);
+        cubeGroup.add(box);
 
         // Create and render the edges of the cube
-        const edgesGeometry = new THREE.EdgesGeometry(cubeGeometry);
+        const edgesGeometry = new THREE.EdgesGeometry(boxGeometry);
         const lineSegmentsGeometry = new LineSegmentsGeometry();
         lineSegmentsGeometry.setPositions(edgesGeometry.attributes.position.array);
         const lineMaterial = new LineMaterial({
@@ -109,7 +106,7 @@ class Puzzle {
         cubeGroup.add(edges);
 
         // Create and render the text of the cube
-        const textGeometry = new TextGeometry(value.toString(), {
+        const textGeometry = new TextGeometry(cube.value.toString(), {
             font: self._font,
             size: TEXT_SIZE,
             height: TEXT_HEIGHT
@@ -121,10 +118,26 @@ class Puzzle {
         text.position.set(x, y, z);
         cubeGroup.add(text);
 
+        // Create and render the operator and result of the cage if required
+        if (cube.topCorner) {
+            const cageTextGeometry = new TextGeometry(`${cage.result}${cage.operator}`, {
+                font: self._font,
+                size: TEXT_SIZE,
+                height: TEXT_HEIGHT
+            });
+            cageTextGeometry.center();
+            const cageTextMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
+            const cageText = new THREE.Mesh(cageTextGeometry, cageTextMaterial);
+            cageText.name = "cageText";
+            cageText.position.set(x, y, z);
+            cubeGroup.add(cageText);
+        }
+
         // Add the entire cubeGroup at once
         self._scene.add(cubeGroup);
 
-        return cubeGroup;
+        // Track a reference to the cube
+        self._cubeInfo[[i, j, k].join("-")].cubeGroupReference = cubeGroup;
     }
 
     // Set the value of the current cube to the provided input.

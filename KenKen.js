@@ -8,14 +8,13 @@ class KenKen {
         self.cubeInfo = {}
         self.cageInfo = {}
 
-
         if (self.createLatinCube(0, 0, 0)) {
             console.table(self.cube.map(layer => layer.map(row => row.join(' ')).join('   ')));
         }
 
         self.createKenKen();
-        // console.log(self.cubeInfo);
-        // console.log(self.cageInfo);
+        console.log(self.cubeInfo);
+        console.log(self.cageInfo);
     }
   
     createLatinCube(x, y, z) {
@@ -127,6 +126,21 @@ class KenKen {
                 const [x, y, z] = cell;
                 self.cubeInfo[`${x}-${y}-${z}`] = {value: '', cageNumber: cageNumber, cubeGroupReference: null};
             });
+
+            // Find the top corner of the cage and mark it
+            cage.sort((a, b) => {
+                if (a[2] !== b[2]) {
+                  return b[2] - a[2]; // max z (blue)
+                } else if (a[1] !== b[1]) {
+                  return b[1] - a[1]; // max y (green)
+                } else {
+                  return a[0] - b[0]; // min x (orange)
+                }
+            });
+            self.cubeInfo[`${cage[0][0]}-${cage[0][1]}-${cage[0][2]}`].topCorner = true;
+            for (let i = 1; i < cage.length; i++) {
+                self.cubeInfo[`${cage[i][0]}-${cage[i][1]}-${cage[i][2]}`].topCorner = false;
+            }
 
             // Set cageInfo
             self.cageInfo[`${cageNumber}`] = {operator: operator, result: result, color: ''};
