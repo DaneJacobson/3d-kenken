@@ -122,14 +122,14 @@ class Puzzle {
         if (cube.topCorner) {
             const cageTextGeometry = new TextGeometry(`${cage.result}${cage.operator}`, {
                 font: self._font,
-                size: TEXT_SIZE,
-                height: TEXT_HEIGHT
+                size: 0.15,
+                height: 0.01
             });
             cageTextGeometry.center();
             const cageTextMaterial = new THREE.MeshBasicMaterial({color: 0x000000});
             const cageText = new THREE.Mesh(cageTextGeometry, cageTextMaterial);
             cageText.name = "cageText";
-            cageText.position.set(x, y, z);
+            cageText.position.set(x - 0.3, y + 0.3, z + 0.3);
             cubeGroup.add(cageText);
         }
 
