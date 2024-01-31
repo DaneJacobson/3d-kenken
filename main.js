@@ -10,7 +10,7 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 import { KenKen } from './KenKen.js';
 
 
-const TEXT_SIZE = 0.5;
+const TEXT_SIZE = 0.3;
 const TEXT_HEIGHT = 0.1;
 
 
@@ -161,9 +161,9 @@ class Puzzle {
         // Create and render the cube
         const boxGeometry = new THREE.BoxGeometry();
         const boxMaterial = new THREE.MeshBasicMaterial({
-            color: cage.color,
+            color: 0xffffff,
             transparent: true,
-            opacity: 0.5
+            opacity: 0.1
         });
         const box = new THREE.Mesh(boxGeometry, boxMaterial);
         box.name = "box";
@@ -176,7 +176,7 @@ class Puzzle {
         lineSegmentsGeometry.setPositions(edgesGeometry.attributes.position.array);
         const lineMaterial = new LineMaterial({
             color: 0x000000,
-            linewidth: 1,
+            linewidth: 0.7,
             resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
         })
         const edges = new Line2(lineSegmentsGeometry, lineMaterial);
@@ -224,11 +224,37 @@ class Puzzle {
         const self = this;
 
         // Change the linewidths
-        self._cubeInfo[self._currentPointer].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 1;
+        self._cubeInfo[self._currentPointer].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 0.7;
         self._cubeInfo[target].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 5;
+
+        const oldCage = self._cubeInfo[self._currentPointer].cageNumber.toString();
+        const newCage = self._cubeInfo[target].cageNumber.toString();
 
         // Set pointer
         self._currentPointer = target;
+
+        // New cage colors
+        if (oldCage !== newCage) {
+            // Wipe the colors
+            for (let x = 0; x < self._n; x++) {
+                for (let y = 0; y < self._n; y++) {
+                    for (let z = 0; z < self._n; z++) {
+                        const box = self._cubeInfo[`${x}-${y}-${z}`].cubeGroupReference.children.find(c => c.name === "box")
+                        box.material.color.set(0xffffff);
+                        box.material.opacity = 0.1;
+                    }
+                }
+            }
+
+            // Set new cage color
+            const newCageColor = '#ff0000';
+            const cageCubes = Object.values(self._cubeInfo).filter(cube => cube.cageNumber.toString() === newCage);
+            cageCubes.forEach(cube => {
+                const box = cube.cubeGroupReference.children.find(c => c.name === "box");
+                box.material.color.set(newCageColor);
+                box.material.opacity = 0.5;
+            });
+        }
     }
 
     // Set the value of the current cube to the provided input.
@@ -284,7 +310,7 @@ scene.add( axesHelper );
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-const n = 4;
+const n = 5;
 const kenken = new KenKen(n);
 const puzzle = new Puzzle(n, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
 
@@ -321,16 +347,16 @@ window.addEventListener("keydown", function(event) {
     switch (key) {
         case "ArrowUp":
             if (event.shiftKey) {
-                if (z > 0) z--;
-            } else {
                 if (y < max) y++;
+            } else {
+                if (z > 0) z--;
             }
             break;
         case "ArrowDown":
             if (event.shiftKey) {
-                if (z < max) z++;
-            } else {
                 if (y > 0) y--;
+            } else {
+                if (z < max) z++;
             }
             break;
         case "ArrowLeft":

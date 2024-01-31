@@ -1,5 +1,5 @@
 class KenKen {
-    constructor(n = 3, max_cage_size = 4) {
+    constructor(n = 3, max_cage_size = 10) {
         const self = this;
         self.n = n;
         self.max_cage_size = max_cage_size;
@@ -7,6 +7,7 @@ class KenKen {
         self.cube = Array(self.n).fill().map(() => Array(self.n).fill().map(() => Array(self.n).fill(0)));
         self.cubeInfo = {}
         self.cageInfo = {}
+        console.log(self.mst);
 
         if (self.createLatinCube(0, 0, 0)) {
             console.table(self.cube.map(layer => layer.map(row => row.join(' ')).join('   ')));
@@ -74,14 +75,18 @@ class KenKen {
                     cage.push([cx, cy, cz]);
 
                     // Add adjacent cells to stack (check bounds and visited)
-                    [[1, 0, 0], [0, 1, 0], [0, 0, 1]].forEach(([dx, dy, dz]) => {
+                    const directionArray = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]].sort(() => .5 - Math.random());
+                    directionArray.forEach(([dx, dy, dz]) => {
                         let nx = cx + dx, ny = cy + dy, nz = cz + dz;
+                        console.log(`${nx}_${ny}_${nz}`);
+                        
                         if (nx < self.n && ny < self.n && nz < self.n && !visited[nx][ny][nz]) {
                             stack.push([nx, ny, nz]);
                         }
                     });
                 }
             }
+
             return cage;
         }
 
@@ -106,6 +111,9 @@ class KenKen {
             // Try to use division if possible
             operator = '+';
             result = cage.reduce((sum, cell) => sum + self.cube[cell[0]][cell[1]][cell[2]], 0);
+            console.log(cage);
+            console.log(self.cube);
+            console.log(result);
             // console.log(cage);
             // console.log(operator);
             // console.log(result);

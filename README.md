@@ -11,7 +11,7 @@ TODO:
 - click on a box and set the pointer to that
 - randomize the direction construction of the boxes
 
-- balance out the oeprations/cage sizes
+- balance out the operations/cage sizes
 - add correct operation processing to evaluatePuzzle()
 
 - random directions when cages are being built, biased right now
@@ -21,8 +21,8 @@ TODO:
 - add a key so people know the controls lol
 
 - timer
-- Aus says remove colors and make puzzle transparent, only give color to the cage that one is currently on, and provide pronounced outlines for the other cubes. Exploding may not be necessary as a result.
-- Aus asked for highlighting rows, columns, and depths, but that may not be necessary either
 
-
+Speedups
 - 6x6x6 fails to generate, need to figure out why and optimize generation algorithms
+- Wiping colors is tough, I think it might be necessary to add cubes to the cageInfo for quick retrieval
+- 0+ bug somewhere
