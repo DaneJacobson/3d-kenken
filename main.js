@@ -310,7 +310,7 @@ scene.add( axesHelper );
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-const n = 5;
+const n = 4;
 const kenken = new KenKen(n);
 const puzzle = new Puzzle(n, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
 
