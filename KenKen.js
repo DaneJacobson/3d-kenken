@@ -78,9 +78,7 @@ class KenKen {
                     const directionArray = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]].sort(() => .5 - Math.random());
                     directionArray.forEach(([dx, dy, dz]) => {
                         let nx = cx + dx, ny = cy + dy, nz = cz + dz;
-                        console.log(`${nx}_${ny}_${nz}`);
-                        
-                        if (nx < self.n && ny < self.n && nz < self.n && !visited[nx][ny][nz]) {
+                        if (nx < self.n && ny < self.n && nz < self.n && nx >= 0 && ny >= 0 && nz >= 0 && !visited[nx][ny][nz]) {
                             stack.push([nx, ny, nz]);
                         }
                     });
