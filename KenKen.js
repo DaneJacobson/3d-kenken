@@ -106,26 +106,34 @@ class KenKen {
             let operator;
             let result;
 
-            // Try to use division if possible
-            operator = '+';
-            result = cage.reduce((sum, cell) => sum + self.cube[cell[0]][cell[1]][cell[2]], 0);
-            console.log(cage);
-            console.log(self.cube);
-            console.log(result);
-            // console.log(cage);
-            // console.log(operator);
-            // console.log(result);
-            // if (cage.length === 2 && cage[0] % cage[1] === 0) {
-            //     operator = '/';
-            //     result = cage[0] / cage[1];
-            // } else if (cage.length === 2 && cage[0] - cage[1] > 0) {
-            //     operator = '-';
-            //     result = cage[0] = cage[1];
-            // } else {
-            //     // Fallback to other operators
-            //     operator = '+';
-            //     result = cage.reduce((acc, val) => acc + val, 0);
-            // }
+            if (cage.length === 2) {
+                const [cell1, cell2] = cage;
+                const value1 = self.cube[cell1[0]][cell1[1]][cell1[2]];
+                const value2 = self.cube[cell2[0]][cell2[1]][cell2[2]];
+    
+                if (value1 % value2 === 0) {
+                    operator = '/';
+                    result = value1 / value2;
+                } else if (value2 % value1 === 0) {
+                    operator = '/';
+                    result = value2 / value1;
+                } else if (value1 > value2) {
+                    operator = '-';
+                    result = value1 - value2;
+                } else {
+                    operator = '-';
+                    result = value2 - value1;
+                }
+            } else {
+                const randomOperator = Math.random();
+                if (randomOperator < 0.5) {
+                    operator = '+';
+                    result = cage.reduce((sum, cell) => sum + self.cube[cell[0]][cell[1]][cell[2]], 0);
+                } else {
+                    operator = '*';
+                    result = cage.reduce((product, cell) => product * self.cube[cell[0]][cell[1]][cell[2]], 1);
+                }
+            }
 
             // Set cubeInfo
             cage.forEach(cell => {
@@ -156,71 +164,7 @@ class KenKen {
             self.cageInfo[`${cageNumber}`] = {operator: operator, result: result, color: ''};
         });
 
-        // Find minimum k-coloring to assign coloring
-
     }
 }
-
-// // Function to check if two cells are adjacent
-// function isAdjacent(cell1, cell2) {
-//     for (let i = 0; i < 3; i++) {
-//         if (Math.abs(cell1[i] - cell2[i]) <= 1 && cell1[(i + 1) % 3] === cell2[(i + 1) % 3] && cell1[(i + 2) % 3] === cell2[(i + 2) % 3]) {
-//             return true;
-//         }
-//     }
-//     return false;
-// }
-
-// // Function to check if two cages are adjacent
-// function areCagesAdjacent(cage1, cage2) {
-//     for (const cell1 of cage1) {
-//         for (const cell2 of cage2) {
-//             if (isAdjacent(cell1, cell2)) {
-//                 return true;
-//             }
-//         }
-//     }
-//     return false;
-// }
-
-// // Build the adjacency graph
-// let graph = new Map();
-// for (let i = 0; i < cages.length; i++) {
-//     graph.set(i, []);
-//     for (let j = 0; j < cages.length; j++) {
-//         if (i !== j && areCagesAdjacent(cages[i], cages[j])) {
-//             graph.get(i).push(j);
-//         }
-//     }
-// }
-
-// // Function to find minimum k-coloring
-// function findMinimumKColoring(graph) {
-//     let colors = new Map();
-//     let maxColor = 0;
-    
-//     for (const [node, neighbors] of graph.entries()) {
-//         let availableColors = new Set(Array.from({length: maxColor + 1}, (_, i) => i));
-//         for (const neighbor of neighbors) {
-//             if (colors.has(neighbor)) {
-//                 availableColors.delete(colors.get(neighbor));
-//             }
-//         }
-//         let chosenColor = availableColors.size > 0 ? Math.min(...availableColors) : maxColor + 1;
-//         colors.set(node, chosenColor);
-//         maxColor = Math.max(maxColor, chosenColor);
-//     }
-
-//     return colors;
-// }
-
-// // Assign colors to cages
-// let coloring = findMinimumKColoring(graph);
-// for (const [cageNumber, color] of coloring.entries()) {
-//     self.cageInfo[`${cageNumber + 1}`].color = color; // Adjust index to match cage numbering
-// }
-
-// // Now you can use the `self.cageInfo` to access the color of each cage.
-
 
 export { KenKen };

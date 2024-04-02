@@ -134,11 +134,15 @@ class Puzzle {
                 const result = values.reduce((sum, val) => sum * parseInt(val, 10), 1);
                 if (result !== cage.result) return false;
             } else if (operator === '-') {
-                null;
+                const [value1, value2] = values.map(val => parseInt(val, 10));
+                if (Math.abs(value1 - value2) !== cage.result && Math.abs(value2 - value1) !== cage.result) {
+                    return false;
+                }
             } else if (operator === '/') {
-                null;
-            } else {
-                null;
+                const [value1, value2] = values.map(val => parseInt(val, 10));
+                if (value1 / value2 !== cage.result && value2 / value1 !== cage.result) {
+                    return false;
+                }
             }
         }
 
@@ -310,7 +314,7 @@ scene.add( axesHelper );
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-const n = 4;
+const n = 3;
 const kenken = new KenKen(n);
 const puzzle = new Puzzle(n, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
 
