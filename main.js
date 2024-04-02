@@ -62,7 +62,7 @@ class Puzzle {
             }
 
             // Add controls
-            self._currentPointer = "0-0-0";
+            self._currentPointer = `0-${n-1}-${n-1}`;
             self.setCurrentPointer(self._currentPointer);
         });
     }

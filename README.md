@@ -1,7 +1,7 @@
 # 3d kenken
 
 TODO:
-- full operations (only addition right now)
+- glitch where the starting box shfould be highlighted at start
 - add correct operation processing to evaluatePuzzle()
 - point and click on boxes
 - explode the cages for easy access
@@ -12,6 +12,7 @@ TODO:
 - balance out the operations/cage sizes
 - add a key so people know the controls lol
 - timer
+- figure out how to get the correct division and multiplication symbols as operators.
 
 Speedups
 - 6x6x6 takes too long to generate, need to figure out why and optimize generation algorithms
