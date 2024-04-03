@@ -41,7 +41,7 @@ class Puzzle {
 
         // Loading in a font for the cube value text
         const loader = new FontLoader();
-        loader.load('public/fonts/helvetiker_regular.typeface.json', function (font) {
+        loader.load('fonts/helvetiker_regular.typeface.json', function (font) {
             self._n = n; // cubic dimensions
             self._cubeInfo = cubeInfo; // {x-y-z: {'value': current cube number, 'solution': correct cube number, 'cageNumber': cage number, 'cubeGroupReference': group reference, 'topCorner': true/false}
             self._cageInfo = cageInfo; // {cage number: {'operator': + - * /, 'result': result number, 'color': hex color}}
