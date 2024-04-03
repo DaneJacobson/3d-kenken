@@ -3,8 +3,10 @@ import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { LineSegmentsGeometry } from 'three/addons/lines/LineSegmentsGeometry.js';
 import { LineMaterial } from 'three/addons/lines/LineMaterial.js';
 import { Line2 } from 'three/addons/lines/Line2.js';
-import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
+import { Timer } from './Timer.js';
+
 
 // Constants
 const TEXT_SIZE = 0.3;
@@ -28,7 +30,7 @@ function getRandomRainbowColor() {
 }
 
 class Puzzle {
-    constructor(n, cubeInfo, cageInfo, scene, camera, renderer) {
+    constructor(n, cubeInfo, cageInfo, scene, camera, renderer, timer) {
         const self = this;
 
         // Loading in a font for the cube value text
@@ -56,16 +58,101 @@ class Puzzle {
             // Add controls
             self._currentPointer = `0-${n-1}-${n-1}`;
             self.setCurrentPointer(self._currentPointer);
+
+            // Add timer
+            self._timer = new Timer();
+            self._timer.start();
+
+            // Add new keyboard listener
+            self._handleKeyDown = (event) => self.processKeyboardInput(event.key);
+            window.addEventListener("keydown", self._handleKeyDown);
         });
+    }
+
+    cleanPuzzleObject() {
+        const self = this;
+
+        // Clear the scene
+        while (self._scene.children.length > 0) {
+            self._scene.remove(self._scene.children[0]);
+        }
+
+        // Clear the timer
+        self._timer.stop();
+
+        // Clear the event listeners
+        window.removeEventListener("keydown", self._handleKeyDown);
+    }
+
+    // Process the keyboard inputs
+    processKeyboardInput(key) {
+        const self = this;
+
+        // Check if the key is an integer
+        if (!isNaN(parseInt(key, 10)) && key > 0 && key <= 9) {
+            self.setCurrentPointerValue(key);
+            return;
+        }
+
+        // Check if the key is Backspace or Delete
+        if ((key === "Delete") || (key === "Backspace")) {
+            self.setCurrentPointerValue("");
+            return;
+        }
+
+        // Check if the key is a "reset camera" key
+        if (key === "r" || key === "R") {
+            camera.position.set(0, 0, 5);
+            return;
+        }
+
+        // Extract the current coordinates from the currentPointer
+        let [x, y, z] = self._currentPointer.split("-").map(Number);
+
+        // Define the maximum boundary based on the puzzle size
+        const max = self._n - 1;
+
+        // Process the direction inputs
+        switch (key) {
+            case "ArrowUp":
+                if (event.shiftKey) {
+                    if (y < max) y++;
+                } else {
+                    if (z > 0) z--;
+                }
+                break;
+            case "ArrowDown":
+                if (event.shiftKey) {
+                    if (y > 0) y--;
+                } else {
+                    if (z < max) z++;
+                }
+                break;
+            case "ArrowLeft":
+                if (x > 0) x--;
+                break;
+            case "ArrowRight":
+                if (x < max) x++;
+                break;
+        }
+
+        // Update the current pointer
+        const newPointer = `${x}-${y}-${z}`;
+        if (newPointer !== self._currentPointer) {
+            self.setCurrentPointer(newPointer);
+        }
     }
 
     // Add to entry counter and check if puzzle is done.
     addToEntryCounter() {
         const self = this;
+
         self._entryCounter++;
         if (self._entryCounter === Math.pow(self._n, 3)) {
             if (self.evaluatePuzzle()) {
-                alert("Congratulations on completing the puzzle!");
+                const formattedTime = self._timer.getFormattedTime();
+                self._timer.stop();
+                alert(`Congratulations on completing the puzzle in ${formattedTime}`);
             } else {
                 alert("Invalid solution: try again");
             }
