@@ -1,5 +1,5 @@
 class KenKen {
-    constructor(n = 3, max_cage_size = 10) {
+    constructor(n = 3, max_cage_size = 4) {
         const self = this;
         self.n = n;
         self.max_cage_size = max_cage_size;
@@ -101,37 +101,42 @@ class KenKen {
 
         // Assign operators and calculate results for each cage
         let cageNumber = 0;
-        cages = cages.forEach(cage => {
+        cages.forEach(cage => {
             cageNumber++;
             let operator;
             let result;
 
-            if (cage.length === 2) {
+            if (cage.length === 1) {
+                const cell = cage[0];
+                operator = '';
+                result = self.cube[cell[0]][cell[1]][cell[2]];
+            } else if (cage.length === 2) {
                 const [cell1, cell2] = cage;
                 const value1 = self.cube[cell1[0]][cell1[1]][cell1[2]];
                 const value2 = self.cube[cell2[0]][cell2[1]][cell2[2]];
-    
-                if (value1 % value2 === 0) {
+
+                if (value1 / value2 === 1) {
                     operator = '/';
                     result = value1 / value2;
-                } else if (value2 % value1 === 0) {
+                } else if (value2 / value1 === 1) {
                     operator = '/';
                     result = value2 / value1;
-                } else if (value1 > value2) {
+                } else if (value1 - value2 > 0) {
                     operator = '-';
                     result = value1 - value2;
-                } else {
+                } else if (value2 - value1 > 0) {
                     operator = '-';
                     result = value2 - value1;
                 }
             } else {
+                const values = cage.map(cell => self.cube[cell[0]][cell[1]][cell[2]]);
                 const randomOperator = Math.random();
                 if (randomOperator < 0.5) {
                     operator = '+';
-                    result = cage.reduce((sum, cell) => sum + self.cube[cell[0]][cell[1]][cell[2]], 0);
+                    result = values.reduce((sum, val) => sum + val, 0);
                 } else {
                     operator = '*';
-                    result = cage.reduce((product, cell) => product * self.cube[cell[0]][cell[1]][cell[2]], 1);
+                    result = values.reduce((product, val) => product * val, 1);
                 }
             }
 
