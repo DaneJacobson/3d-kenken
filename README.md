@@ -1,8 +1,6 @@
 # 3d kenken
 
 TODO:
-- glitch where the starting box shfould be highlighted at start
-- add correct operation processing to evaluatePuzzle()
 - point and click on boxes
 - explode the cages for easy access
 - ship somewhere online (maybe Vercel?)

@@ -231,34 +231,30 @@ class Puzzle {
         self._cubeInfo[self._currentPointer].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 0.7;
         self._cubeInfo[target].cubeGroupReference.children.find(c => c.name === "edges").material.linewidth = 5;
 
-        const oldCage = self._cubeInfo[self._currentPointer].cageNumber.toString();
-        const newCage = self._cubeInfo[target].cageNumber.toString();
-
         // Set pointer
         self._currentPointer = target;
+        const newCage = self._cubeInfo[target].cageNumber.toString();
 
-        // New cage colors
-        if (oldCage !== newCage) {
-            // Wipe the colors
-            for (let x = 0; x < self._n; x++) {
-                for (let y = 0; y < self._n; y++) {
-                    for (let z = 0; z < self._n; z++) {
-                        const box = self._cubeInfo[`${x}-${y}-${z}`].cubeGroupReference.children.find(c => c.name === "box")
-                        box.material.color.set(0xffffff);
-                        box.material.opacity = 0.1;
-                    }
+        // Wipe the colors on the old cage, set the colors on the new cage
+        // (this may be unnecessary and can be optimized for performance)
+        for (let x = 0; x < self._n; x++) {
+            for (let y = 0; y < self._n; y++) {
+                for (let z = 0; z < self._n; z++) {
+                    const box = self._cubeInfo[`${x}-${y}-${z}`].cubeGroupReference.children.find(c => c.name === "box")
+                    box.material.color.set(0xffffff);
+                    box.material.opacity = 0.1;
                 }
             }
-
-            // Set new cage color
-            const newCageColor = '#ff0000';
-            const cageCubes = Object.values(self._cubeInfo).filter(cube => cube.cageNumber.toString() === newCage);
-            cageCubes.forEach(cube => {
-                const box = cube.cubeGroupReference.children.find(c => c.name === "box");
-                box.material.color.set(newCageColor);
-                box.material.opacity = 0.5;
-            });
         }
+
+        // Set new cage color
+        const newCageColor = '#ff0000';
+        const cageCubes = Object.values(self._cubeInfo).filter(cube => cube.cageNumber.toString() === newCage);
+        cageCubes.forEach(cube => {
+            const box = cube.cubeGroupReference.children.find(c => c.name === "box");
+            box.material.color.set(newCageColor);
+            box.material.opacity = 0.5;
+        });
     }
 
     // Set the value of the current cube to the provided input.
@@ -297,6 +293,7 @@ class Puzzle {
     }
 }
 
+
 // Set up macro components of the puzzle.
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -317,6 +314,25 @@ controls.enableDamping = true;
 const n = 3;
 const kenken = new KenKen(n);
 const puzzle = new Puzzle(n, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
+
+
+// Function to animate the scene.
+function animate() {
+    requestAnimationFrame(animate);
+    controls.update();
+    scene.rotation.x = 0.5;
+    scene.rotation.y = 0.5;
+    renderer.render(scene, camera);
+}
+
+// Confirm the client has WebGL, and if not, warn them.
+if (WebGL.isWebGLAvailable()) {
+    animate();
+} else {
+    const warning = WebGL.getWebGLErrorMessage();
+    document.getElementById('container').appendChild(warning);
+}
+
 
 // Keyboard controls
 window.addEventListener("keydown", function(event) {
@@ -377,20 +393,3 @@ window.addEventListener("keydown", function(event) {
         puzzle.setCurrentPointer(newPointer);
     }
 });
-
-// Function to animate the scene.
-function animate() {
-    requestAnimationFrame(animate);
-    controls.update();
-    scene.rotation.x = 0.5;
-    scene.rotation.y = 0.5;
-    renderer.render(scene, camera);
-}
-
-// Confirm the client has WebGL, and if not, warn them.
-if (WebGL.isWebGLAvailable()) {
-    animate();
-} else {
-    const warning = WebGL.getWebGLErrorMessage();
-    document.getElementById('container').appendChild(warning);
-}
