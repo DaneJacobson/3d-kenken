@@ -4,7 +4,6 @@ import WebGL from 'three/addons/capabilities/WebGL.js';
 
 import { KenKen } from './KenKen.js';
 import { Puzzle } from './Puzzle.js';
-import { Timer } from './Timer.js';
 
 
 // Constants
