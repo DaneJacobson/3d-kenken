@@ -303,10 +303,6 @@ renderer.setClearColor(0xffffff, 1);
 document.body.appendChild(renderer.domElement);
 camera.position.z = 5;
 
-// Add axes for debugging
-const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
-
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;

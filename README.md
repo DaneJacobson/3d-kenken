@@ -11,7 +11,6 @@ TODO:
 - add a key so people know the controls lol
 - timer
 - figure out how to get the correct division and multiplication symbols as operators.
-- Change title from "My first three.js app" to "3D-KenKen"
 - pop-up for contacting me on X about bugs
 
 Speedups
