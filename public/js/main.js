@@ -3,7 +3,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import WebGL from 'three/addons/capabilities/WebGL.js';
 
 import { KenKen } from './KenKen.js';
-import { Puzzle } from './Puzzle.js';
+import { Puzzle } from './puzzle.js';
 
 
 // for debugging
