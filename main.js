@@ -301,13 +301,13 @@ const renderer = new THREE.WebGLRenderer({antialias: true});
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setClearColor(0xffffff, 1);
 document.body.appendChild(renderer.domElement);
-camera.position.z = 5;
+camera.position.z = 6;
 
 // Add orbit controls
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 
-const n = 3;
+const n = 4;
 const kenken = new KenKen(n);
 const puzzle = new Puzzle(n, kenken.cubeInfo, kenken.cageInfo, scene, camera, renderer);
 

@@ -1,0 +1,35 @@
+body {
+    margin: 0;
+}
+
+.help-icon {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 40px;
+    height: 40px;
+    background-color: #fff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.help-content {
+    display: none;
+    position: fixed;
+    bottom: 70px;
+    left: 20px;
+    width: 200px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.help-content.show {
+    display: block;
+}
