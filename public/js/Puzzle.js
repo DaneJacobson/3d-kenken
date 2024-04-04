@@ -29,11 +29,7 @@ class Puzzle {
 
             // Set starting color
             const savedColor = localStorage.getItem('cageColor');
-            if (savedColor) {
-                self._color = savedColor;
-            } else {
-                self._color = '#ff0000';
-            }
+            self._color = savedColor ? savedColor : '#ff0000';
 
             // Render the puzzle by create the cube with text at the right location
             for (let i = 0; i < self._n; i++) {
