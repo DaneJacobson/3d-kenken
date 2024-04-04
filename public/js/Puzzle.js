@@ -13,22 +13,6 @@ const TEXT_SIZE = 0.3;
 const TEXT_HEIGHT = 0.1;
 
 
-// Returns random rainbow color for cage coloring
-function getRandomRainbowColor() {
-    // Array of hex codes representing rainbow colors
-    const rainbowColors = [
-        '#ff0000', // Red
-        '#ff7f00', // Orange
-        '#ffff00', // Yellow
-        '#00ff00', // Green
-        '#add8e6', // Blue
-    ];
-
-    // Randomly select a color from the array
-    const randomIndex = Math.floor(Math.random() * rainbowColors.length);
-    return rainbowColors[randomIndex];
-}
-
 class Puzzle {
     constructor(n, cubeInfo, cageInfo, scene, camera, renderer, timer) {
         const self = this;
@@ -43,8 +27,13 @@ class Puzzle {
             self._entryCounter = 0;
             self._font = font;
 
-            // Assign colors
-            Object.entries(cageInfo).forEach(entry => entry[1].color = getRandomRainbowColor());
+            // Set starting color
+            const savedColor = localStorage.getItem('cageColor');
+            if (savedColor) {
+                self._color = savedColor;
+            } else {
+                self._color = '#ff0000';
+            }
 
             // Render the puzzle by create the cube with text at the right location
             for (let i = 0; i < self._n; i++) {
@@ -66,6 +55,12 @@ class Puzzle {
             // Add new keyboard listener
             self._handleKeyDown = (event) => self.processKeyboardInput(event.key);
             window.addEventListener("keydown", self._handleKeyDown);
+
+            // Add new color listener
+            self._handleColorChange = (event) => self.processColorChange(event.target.value);
+            const colorPicker = document.getElementById("color-picker");
+            colorPicker.addEventListener("input", self._handleColorChange);
+            colorPicker.value = self._color // Setting the default color upon refresh
         });
     }
 
@@ -82,6 +77,9 @@ class Puzzle {
 
         // Clear the event listeners
         window.removeEventListener("keydown", self._handleKeyDown);
+
+        // Clear the color listeners
+        window.removeEventListener("change", self._handleColorChange);
     }
 
     // Process the keyboard inputs
@@ -141,6 +139,18 @@ class Puzzle {
         if (newPointer !== self._currentPointer) {
             self.setCurrentPointer(newPointer);
         }
+    }
+
+    // Add an event listener for the color picker
+    processColorChange(selectedColor) {
+        const self = this;
+
+        // Sets the new color
+        self._color = selectedColor;
+        localStorage.setItem('cageColor', self._color);
+
+        // Rerenders the color
+        self.setCurrentPointer(self._currentPointer);
     }
 
     // Add to entry counter and check if puzzle is done.
@@ -327,11 +337,10 @@ class Puzzle {
         }
 
         // Set new cage color
-        const newCageColor = '#ff0000';
         const cageCubes = Object.values(self._cubeInfo).filter(cube => cube.cageNumber.toString() === newCage);
         cageCubes.forEach(cube => {
             const box = cube.cubeGroupReference.children.find(c => c.name === "box");
-            box.material.color.set(newCageColor);
+            box.material.color.set(self._color);
             box.material.opacity = 0.5;
         });
     }

@@ -80,3 +80,12 @@ body {
     font-size: 24px;
     color: #000;
 }
+
+.color-picker {
+    position: fixed;
+    bottom: 23.5px;
+    left: 140px;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000;
+}
