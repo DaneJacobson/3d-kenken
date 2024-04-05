@@ -34,6 +34,15 @@ body {
     display: block;
 }
 
+.help-content ul {
+    padding-left: 10px;
+}
+
+.help-content h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 .size-icon {
     position: fixed;
     bottom: 20px;
